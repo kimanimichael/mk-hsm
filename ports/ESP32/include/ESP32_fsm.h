@@ -20,13 +20,15 @@ class Active: public HSM {
 public:
     explicit Active(StateHandler initial);
 
-    void _start();
+    void _start() const;
 
     void _post(Event const * e) const;
 
     static void event_loop(void *param);
 
     [[noreturn]] void _event_loop();
+
+    static void _run(const Active *object);
 public:
     UBaseType_t _priority = {};    /* Task priority */
     QueueHandle_t _queue = {};   /* Message queue handle */
@@ -36,8 +38,6 @@ private:
 
     /* active object data added in subclasses of Active */
 };
-
-#endif //ESP32FSM_H
 
 class TimeEvent : public Event {
 public:
@@ -49,7 +49,7 @@ public:
 
     static void tick(TimerHandle_t xTimer);
 
-    void _tick();
+    void _tick() const;
 
     Active* _act;
     uint32_t _timeout = {};
@@ -63,3 +63,5 @@ public:
     static TimeEvent* get_default_instance(Signal sig, Active *act);
 
 };
+
+#endif //ESP32FSM_H

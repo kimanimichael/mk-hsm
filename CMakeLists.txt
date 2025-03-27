@@ -23,5 +23,6 @@ else ()
             "ports/ESP32/include"
             REQUIRES
             "driver"
+            "drivers"
     )
 endif ()
