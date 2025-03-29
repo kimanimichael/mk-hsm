@@ -1,10 +1,12 @@
 #include "ESP32_fsm.h"
 #include "bsp.h"
+#include "ESP32_bsp.h"
 
 #define QUEUE_LENGTH 10
 #define MAX_TIME_EVENTS 10
 
 #define TIMER_PERIOD_MS 100
+#define BUTTON_INTERVAL_MS 10
 
 static constexpr Event button_pressed_evt = {BUTTON_PRESSED_SIG};
 
@@ -15,10 +17,14 @@ void Active::_run(const Active *object) {
     xTaskCreate(Active::event_loop, "TimeBomb task", 2048, &param, 1, nullptr);
 
 
-    object->_post(&button_pressed_evt);
+    // object->_post(&button_pressed_evt);
 
     if (TimerHandle_t my_timer = xTimerCreate("MyTimer", pdMS_TO_TICKS(TIMER_PERIOD_MS), pdTRUE, nullptr, TimeEvent::tick); my_timer != nullptr) {
         xTimerStart(my_timer, 0);
+    }
+
+    if (TimerHandle_t button_timer = xTimerCreate("ButtonTimer", pdMS_TO_TICKS(BUTTON_INTERVAL_MS), pdTRUE, nullptr, ESP_BSP::BSP_button_read); button_timer != nullptr) {
+        xTimerStart(button_timer, 0);
     }
 }
 
