@@ -42,12 +42,12 @@ public:
      * Executes first state and entry to the new state
      * @param e first event usually null
      */
-    void _init(Event const * e);
+    void _init(Event const * e) const;
     /**
      * @brief Handle event in current _state and transition if need be
      * @param e Event to be handles
      */
-    void         _dispatch(Event const * e);
+    void         _dispatch(Event const * e) const;
     /**
      * @brief HSM top state
      * @param e Event to be handled

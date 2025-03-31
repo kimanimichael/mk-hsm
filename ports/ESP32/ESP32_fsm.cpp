@@ -1,9 +1,7 @@
-#include "ESP32_fsm.h"
-
-#include "esp_log.h"
-
 #include "bsp.h"
+#include "ESP32_fsm.h"
 #include "ESP32_bsp.h"
+#include "esp_log.h"
 
 #define QUEUE_LENGTH 10
 #define MAX_TIME_EVENTS 10
@@ -11,9 +9,7 @@
 #define TIMER_PERIOD_MS 100
 #define BUTTON_INTERVAL_MS 10
 
-const static char *TAG = "esp_fsm";
-
-static constexpr Event button_pressed_evt = {BUTTON_PRESSED_SIG};
+static auto TAG = "esp_fsm";
 
 static uint64_t param;
 

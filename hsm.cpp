@@ -10,7 +10,7 @@ HSM::HSM(const StateHandler initial) {
     _state = initial;
 }
 
-void HSM::_init(Event const* const e) {
+void HSM::_init(Event const* const e) const {
     if (_state == static_cast<StateHandler>(nullptr)) {
         return;
     }
@@ -21,7 +21,7 @@ void HSM::_init(Event const* const e) {
     (_state)(&entry_evt);
 }
 
-void HSM::_dispatch(Event const* const e) {
+void HSM::_dispatch(Event const* const e) const {
     if (_state == static_cast<StateHandler>(nullptr)) {
         return;
     }
