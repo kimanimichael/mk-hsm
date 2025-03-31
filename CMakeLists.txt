@@ -24,5 +24,6 @@ else ()
             REQUIRES
             "driver"
             "drivers"
+            "log"
     )
 endif ()
