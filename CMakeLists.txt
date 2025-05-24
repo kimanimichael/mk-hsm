@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 
 if (PLATFORM STREQUAL "mbed-os")
-    add_library(fsm INTERFACE)
+    add_library(mk-hsm INTERFACE)
 
     if (PORT STREQUAL "STM32F429ZI")
 
