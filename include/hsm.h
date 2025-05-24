@@ -2,6 +2,7 @@
 #define HSM_H_
 
 #include <cstdint>
+#include <functional>
 
 /*---------------------------------------------------------------------------*/
 /* Event facilities... */
@@ -26,7 +27,7 @@ public:
 
 typedef enum{TRAN_STATUS, HANDLED_STATUS, IGNORED_STATUS, INIT_STATUS, SUPER_STATUS} State;
 
-typedef State(*StateHandler)(Event const * const e);
+typedef std::function<State(Event const * const)> StateHandler;
 
 #define TRAN(target_) (_state = (StateHandler)(target_), TRAN_STATUS)
 #define SUPER(super_) (_temp = (StateHandler)(super_), SUPER_STATUS)
@@ -37,7 +38,7 @@ public:
      * @brief Assigns _state to the entry state
      * @param initial entry state
      */
-    explicit HSM(StateHandler initial);
+    explicit HSM(const StateHandler& initial);
     /**
      * Executes first state and entry to the new state
      * @param e first event usually null

@@ -6,23 +6,23 @@ static constexpr Event init_evt  = {INIT_SIGNAL};
 static constexpr Event entry_evt = {ENTRY_SIGNAL};
 static constexpr Event exit_evt  = {EXIT_SIGNAL};
 
-HSM::HSM(const StateHandler initial) {
+HSM::HSM(const StateHandler& initial) {
     _state = initial;
 }
 
 void HSM::_init(Event const* const e) const {
-    if (_state == static_cast<StateHandler>(nullptr)) {
+    if (!_state) {
         return;
     }
     (_state)(e);
-    if (_state == static_cast<StateHandler>(nullptr)) {
+    if (!_state) {
         return;
     }
     (_state)(&entry_evt);
 }
 
 void HSM::_dispatch(Event const* const e) const {
-    if (_state == static_cast<StateHandler>(nullptr)) {
+    if (!_state) {
         return;
     }
     const StateHandler prev_state = _state;
@@ -33,7 +33,7 @@ void HSM::_dispatch(Event const* const e) const {
     }
 
     while (stat == TRAN_STATUS) {
-        if (_state == static_cast<StateHandler>(nullptr)) {
+        if (!_state) {
             return;
         }
         (prev_state)(&exit_evt);
