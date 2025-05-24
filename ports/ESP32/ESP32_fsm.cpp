@@ -15,7 +15,7 @@ static uint64_t param;
 
 void Active::_run(Active *object) {
     object->_start();
-    xTaskCreate(Active::event_loop, "TimeBomb task", 2048, &param, object->_priority, nullptr);
+    xTaskCreate(event_loop, "TimeBomb task", 2048, &param, object->_priority, nullptr);
 
     if (TimerHandle_t my_timer = xTimerCreate("MyTimer", pdMS_TO_TICKS(TIMER_PERIOD_MS), pdTRUE, nullptr, TimeEvent::tick); my_timer != nullptr) {
         xTimerStart(my_timer, 0);
@@ -29,7 +29,8 @@ void Active::_run(Active *object) {
 
 Active * Active::active_instance = nullptr;
 
-Active::Active(const StateHandler initial): HSM(initial) {
+Active::Active(const StateHandler& initial): HSM(initial) {
+    printf("Active init\n");
     active_instance = this;
 }
 
@@ -49,7 +50,7 @@ void Active::event_loop(void* param) {
 }
 
 
-[[noreturn]] void Active::_event_loop() {
+[[noreturn]] void Active::_event_loop() const {
     Event e = {};
 
     HSM::_init((Event*)nullptr);

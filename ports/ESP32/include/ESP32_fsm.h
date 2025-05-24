@@ -18,7 +18,7 @@ public:
      * @brief Init. Assigns active_instance to this
      * @param initial HSM initial state
      */
-    explicit Active(StateHandler initial);
+    explicit Active(const StateHandler& initial);
     /**
      * @brief Create message queue to handle events
      */
@@ -35,13 +35,13 @@ public:
     /**
      * @brief Init HSM,block for event & dispatch in while loop
      */
-    [[noreturn]] void _event_loop();
+    [[noreturn]] void _event_loop() const;
     /**
      * @brief Start AO with associated timers
      * @param object Active object to be started
      */
     static void _run(Active *object);
-public:
+
     /** Task priority. Must be set before _run is called */
     UBaseType_t _priority = {};
     /** Event queue for receiving events */
