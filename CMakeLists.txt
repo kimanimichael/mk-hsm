@@ -19,7 +19,7 @@ else ()
             "hsm.cpp"
             "ports/ESP32/ESP32_fsm.cpp"
             INCLUDE_DIRS
-            "./include"
+            "./"
             "ports/ESP32/include"
             REQUIRES
             "driver"
