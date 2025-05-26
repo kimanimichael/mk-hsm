@@ -20,17 +20,27 @@ As of now, only the ESP-IDF platform is supported. Support for mbed-os is coming
 
 ## Usage with ESP-IDF
 
-Add the submodule to your CMake built-project by:
+1. Add the submodule to your CMake built-project by:
 > git submodule add git@github.com:kimanimichael/mk-hsm.git
 
-In your CMakeLists.txt, add the following lines:
+2. In your CMakeLists.txt, add the following lines:
 
 `set(EXTRA_COMPONENT_DIRS mk-hsm/)`
 
 `idf_build_component(mk-hsm)`
 
-MK-HSM works by creating the various state-machines as active objects. To create a state machine, 
-you have to inherit from the Active class defined within the ESP32 port inside MK-HSM.
+3. Declare all the potential event signals you might require. You need to extend this from the `USER_SIGNAL` defined in hsm.h within MK-HSM.
+An example for a state machine requiring detection of a button press and timeouts would be:
+
+```c++
+enum EventSignals {
+    ARMED_BUTTON_PRESSED_SIG = USER_SIGNAL,
+    ARMED_BUTTON_RELEASED_SIG,
+    TIMEOUT_SIG
+}
+```
+
+4. Since MK-HSM works by creating the various state-machines as active objects, to create a state machine, inherit from the Active class defined within the ESP32 port inside MK-HSM.
 
 For example for a state machine to blink an LED with armed and defused super states, do:
 ```c++
