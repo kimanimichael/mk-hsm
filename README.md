@@ -108,6 +108,15 @@ State Blinky::_initial(Event const* const e) {
 
 State Blinky::_led_on(Event const* const e) {
     switch (e->_sig) {
+        case ENTRY_SIGNAL: {
+                BSP::led_on();
+                status = HANDLED_STATUS;
+                break;
+        }
+        case EXIT_SIGNAL: {
+                status = HANDLED_STATUS;
+                break;
+        }
         case TIMEOUT_SIG:
              printf("Timeout in blink\n");
              status = TRAN(led_off);
@@ -121,6 +130,15 @@ State Blinky::_led_on(Event const* const e) {
 
 State Blinky::_led_off(Event const* const e) {
     switch (e->_sig) {
+        case ENTRY_SIGNAL: {
+             BSP::led_off();
+             status = HANDLED_STATUS;
+             break;
+        }
+        case EXIT_SIGNAL: {
+             status = HANDLED_STATUS;
+             break;
+        }
         case TIMEOUT_SIG:
              printf("Timeout in blink\n");
              status = TRAN(led_on);
