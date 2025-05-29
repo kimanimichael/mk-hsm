@@ -40,7 +40,7 @@ public:
      * @brief Post message to _queue
      * @param e Pointer to an event
      */
-    void _post(Event * e);
+    void _post(Event const * e);
 
     static void event_loop();
     /**
@@ -53,9 +53,13 @@ public:
      */
     static void _run(const Active *object);
 
+    static void _time_tick();
+
     uint8_t _priority = {};
+
+    rtos::Mutex _queue_mutex;
     /* Event queue */
-    Queue<Event*, 32> _queue; //capacity of 32 events
+    Queue<Event const, 32> _queue; //capacity of 32 events
 
 private:
     /** Used for trampoline functions */
@@ -72,7 +76,7 @@ public:
 
     static void tick();
 
-    void _tick();
+    void _tick() const;
 
     Active* _act;
 

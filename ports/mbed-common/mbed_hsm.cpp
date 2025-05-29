@@ -29,18 +29,27 @@ Active::Active(const StateHandler& initial): HSM(initial) {
     active_instance = this;
 }
 
-void Active::_start() {
-    tick_timer.attach(&TimeEvent::tick, 100ms);
+static Thread ticker_thread;
 
-    static Thread active_thread;
-    active_thread.start(Active::event_loop);
+[[noreturn]] void Active::_time_tick() {
+    printf("Ticker started in AO\n");
+    while (true) {
+        TimeEvent::tick();
+        ThisThread::sleep_for(100ms);    // choose your period
+    }
 }
 
-void Active::_post(Event * e)  {
-    if (_queue.try_put(&e) != true) {
+void Active::_start() {
+    static Thread active_thread;
+    active_thread.start(Active::event_loop);
+    ticker_thread.start(Active::_time_tick);
+}
+
+void Active::_post(Event const * e)  {
+    if (_queue.try_put(e) != true) {
         delete e;
     } else {
-        printf("Event posted...\n");
+        printf("Event posted @ %p — sig=%u\n", (void*)e, e->_sig);
     }
 }
 
@@ -53,17 +62,19 @@ void Active::event_loop() {
     HSM::_init(nullptr);
 
     while (true) {
-        const osEvent evt = _queue.get();
-        if (evt.status == osEventMessage) {
-            const auto* e = static_cast<Event*>(evt.value.p);
-            printf("Event received...\n");
+        printf("Waiting for event...\n");
+        Event const *evt;
+        if (_queue.try_get(&evt)) {
+            printf("Event received \n");
+            const auto* e = static_cast<const Event*>(evt);
+            printf("Event received @ %p — sig=%u\n", (void*)e, e->_sig);
             HSM::_dispatch(e);
         }
     }
 }
 
 void Active::_run(const Active *object) {
-    object->_start();
+   _start();
 }
 
 TimeEvent * TimeEvent::time_event_instance = nullptr;
@@ -108,12 +119,11 @@ void TimeEvent::tick() {
     time_event_instance->_tick();
 }
 
-void TimeEvent::_tick() {
+void TimeEvent::_tick() const {
     for (uint_fast8_t i = 0; i < l_t_evt_num; i++) {
         if (l_t_evt[i] ->_timeout > 0U) {
             l_t_evt[i] ->_timeout --;
             if (l_t_evt[i] ->_timeout == 0U) {
-                printf("Timeout reached. Posting\n");
                 l_t_evt[i] ->_act->_post(this);
                 l_t_evt[i] -> _timeout = l_t_evt[i]->_interval;
             }
