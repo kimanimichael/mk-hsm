@@ -53,7 +53,7 @@ public:
      */
     static void _run(const Active *object);
 
-    static void _time_tick();
+    [[noreturn]] static void _time_tick();
 
     uint8_t _priority = {};
 
