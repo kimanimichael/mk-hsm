@@ -59,7 +59,22 @@ public:
     /** Task priority. Must be set before _run is called */
     UBaseType_t _priority = {};
     /** Event queue for receiving events */
-    QueueHandle_t _queue = {};
+    QueueHandle_t _queue     = {};
+    /**
+     * @brief Name assigned to the task.
+     *
+     * This variable holds the name of the task associated with the active object.
+     * It is used for debugging and task identification purposes.
+     */
+    const char * _task_name  = {};
+    /**
+     * @brief Defines the stack size for the task associated with the active object.
+     *
+     * This variable determines the amount of stack memory allocated when creating
+     * the task for the active object. It is typically specified in bytes. The
+     * default value is set to 4096.
+     */
+    uint32_t     _stack_size = 4096;
 
 private:
     /** Used for trampoline functions */
