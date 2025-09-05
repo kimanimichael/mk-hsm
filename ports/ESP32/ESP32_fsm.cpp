@@ -25,7 +25,6 @@ In case of any enquiries, you can contact the author at muchunumike@gmail.com
 #define MAX_TIME_EVENTS 10
 
 #define TIMER_PERIOD_MS 100
-#define BUTTON_INTERVAL_MS 10
 
 static auto TAG = "esp_fsm";
 
@@ -33,15 +32,13 @@ static uint64_t param;
 
 void Active::_run(Active *object) {
     object->_start();
-    xTaskCreate(event_loop, "TimeBomb task", 2048, &param, object->_priority, nullptr);
+    xTaskCreate(event_loop, object->_task_name, object->_stack_size, &param, object->_priority, nullptr);
 
     if (TimerHandle_t my_timer = xTimerCreate("MyTimer", pdMS_TO_TICKS(TIMER_PERIOD_MS), pdTRUE, nullptr, TimeEvent::tick); my_timer != nullptr) {
         xTimerStart(my_timer, 0);
     }
 
-    if (TimerHandle_t button_timer = xTimerCreate("ButtonTimer", pdMS_TO_TICKS(BUTTON_INTERVAL_MS), pdTRUE, nullptr, ESP_BSP::button_read); button_timer != nullptr) {
-        xTimerStart(button_timer, 0);
-    }
+
 }
 
 
