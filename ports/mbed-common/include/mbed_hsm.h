@@ -61,6 +61,22 @@ public:
     /* Event queue */
     Queue<Event const, 32> _queue; //capacity of 32 events
 
+    /**
+     * @brief Name assigned to the task.
+     *
+     * This variable holds the name of the task associated with the active object.
+     * It is used for debugging and task identification purposes.
+     */
+    const char * _task_name  = {};
+    /**
+     * @brief Defines the stack size for the task associated with the active object.
+     *
+     * This variable determines the amount of stack memory allocated when creating
+     * the task for the active object. It is typically specified in bytes. The
+     * default value is set to 4096.
+     */
+    uint32_t     _stack_size = 4096;
+
 private:
     /** Used for trampoline functions */
     static Active* active_instance; /* @todo Find better solution*/
