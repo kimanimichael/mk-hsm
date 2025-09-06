@@ -77,9 +77,6 @@ public:
     uint32_t     _stack_size = 4096;
 
 private:
-    /** Used for trampoline functions */
-    static Active* active_instance; /* @todo Find better solution*/
-
     /* active object data added in subclasses of Active */
 };
 

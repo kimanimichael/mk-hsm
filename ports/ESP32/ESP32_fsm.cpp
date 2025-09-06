@@ -28,11 +28,9 @@ In case of any enquiries, you can contact the author at muchunumike@gmail.com
 
 static auto TAG = "esp_fsm";
 
-static uint64_t param;
-
 void Active::_run(Active *object) {
     object->_start();
-    xTaskCreate(event_loop, object->_task_name, object->_stack_size, &param, object->_priority, nullptr);
+    xTaskCreate(event_loop, object->_task_name, object->_stack_size, object, object->_priority, nullptr);
 
     if (TimerHandle_t my_timer = xTimerCreate("MyTimer", pdMS_TO_TICKS(TIMER_PERIOD_MS), pdTRUE, nullptr, TimeEvent::tick); my_timer != nullptr) {
         xTimerStart(my_timer, 0);
@@ -42,11 +40,8 @@ void Active::_run(Active *object) {
 }
 
 
-Active * Active::active_instance = nullptr;
-
 Active::Active(const StateHandler& initial): HSM(initial) {
     printf("Active init\n");
-    active_instance = this;
 }
 
 void Active::_start() {
@@ -61,7 +56,8 @@ void Active::_post(Event const * const e) const {
 }
 
 void Active::event_loop(void* param) {
-    active_instance->_event_loop();
+    const auto *self = static_cast<Active*>(param);
+    self->_event_loop();
 }
 
 
