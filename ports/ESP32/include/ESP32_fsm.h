@@ -26,6 +26,11 @@ In case of any enquiries, you can contact the author at muchunumike@gmail.com
 /*---------------------------------------------------------------------------*/
 /* Active Object facilities... */
 
+enum  ESP32ReservedSignals {
+    HSM_RUN_SIG = USER_SIGNAL, /* first signal available to the users */
+    APPLICATION_SIGNAL,
+   };
+
 class Active: public HSM {
 public:
     /**
@@ -54,7 +59,16 @@ public:
      * @brief Start AO with associated timers
      * @param object Active object to be started
      */
-    static void _run(Active *object);
+    static void _init(Active *object);
+    /**
+     * @brief Dispatch HSM run signal to task
+     */
+    void _run() const;
+    /**
+     * @brief Trampoline for _run
+     * @param xTimer Handle to the timer that triggered the callback
+     */
+    static void run(TimerHandle_t xTimer);
 
     /** Task priority. Must be set before _run is called */
     UBaseType_t _priority = {};
@@ -75,6 +89,10 @@ public:
      * default value is set to 4096.
      */
     uint32_t     _stack_size = 4096;
+
+    /** Instance used in trampoline functions */ // @todo Find a better solution
+    static Active* active_instance;
+
 
 private:
     /* active object data added in subclasses of Active */
