@@ -25,7 +25,7 @@ In case of any enquiries, you can contact the author at muchunumike@gmail.com
 #define MAX_TIME_EVENTS 10
 
 #define TIMER_PERIOD_MS 100
-constexpr TickType_t hsm_run_period{100};
+constexpr TickType_t hsm_run_period{200};
 
 static auto TAG = "esp_fsm";
 
@@ -114,7 +114,7 @@ void TimeEvent::_arm(const uint32_t timeout, const uint32_t interval) {
     if (xSemaphoreTake(TimeEvent::_parameters_mutex, portMAX_DELAY)) {
         _timeout = timeout;
         _interval = interval;
-        printf("Armed successfully to %ld \n", _timeout);
+        printf("Armed successfully to %ld , %ld \n", _timeout, _interval);
     } else {
         ESP_LOGE(TAG, "Arming failed\n");
     }
@@ -125,6 +125,7 @@ void TimeEvent::_disarm() {
     if (xSemaphoreTake(TimeEvent::_parameters_mutex, portMAX_DELAY)) {
         _timeout = 0U;
         _interval = 0U;
+        printf("Disarmed successfully\n");
     } else {
         ESP_LOGE(TAG, "Disarming failed\n");
     }
