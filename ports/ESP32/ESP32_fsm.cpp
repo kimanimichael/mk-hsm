@@ -25,15 +25,22 @@ In case of any enquiries, you can contact the author at muchunumike@gmail.com
 #define MAX_TIME_EVENTS 10
 
 #define TIMER_PERIOD_MS 100
+constexpr TickType_t hsm_run_period{200};
 
 static auto TAG = "esp_fsm";
 
-void Active::_run(Active *object) {
+Active * Active::active_instance = nullptr;
+
+void Active::_init(Active *object) {
     object->_start();
     xTaskCreate(event_loop, object->_task_name, object->_stack_size, object, object->_priority, nullptr);
 
     if (TimerHandle_t my_timer = xTimerCreate("MyTimer", pdMS_TO_TICKS(TIMER_PERIOD_MS), pdTRUE, nullptr, TimeEvent::tick); my_timer != nullptr) {
         xTimerStart(my_timer, 0);
+    }
+
+    if (TimerHandle_t run_timer = xTimerCreate("HSM Run", pdMS_TO_TICKS(hsm_run_period), pdTRUE, nullptr, run); run_timer != nullptr) {
+        xTimerStart(run_timer, 0);
     }
 
 
@@ -42,6 +49,7 @@ void Active::_run(Active *object) {
 
 Active::Active(const StateHandler& initial): HSM(initial) {
     printf("Active init\n");
+    active_instance = this;
 }
 
 void Active::_start() {
@@ -51,7 +59,7 @@ void Active::_start() {
 
 void Active::_post(Event const * const e) const {
     assert(_queue != nullptr);
-    printf("Posting to queue\n");
+    // printf("Posting to queue\n");
     xQueueSend(_queue, e, portMAX_DELAY);
 }
 
@@ -67,12 +75,21 @@ void Active::event_loop(void* param) {
     HSM::_init((Event*)nullptr);
 
     while (true) {
-        printf("Waiting for event...\n");
+        // printf("Waiting for event...\n");
         if (xQueueReceive(_queue, &e, portMAX_DELAY)) {
-            printf("Event received...\n");
+            // printf("Event received...\n");
             HSM::_dispatch(&e);
         }
     }
+}
+
+void Active::run(TimerHandle_t xTimer) {
+    active_instance -> _run();
+}
+
+void Active::_run() const {
+    static constexpr Event hsm_run_sig = {HSM_RUN_SIG};
+    _post(&hsm_run_sig);
 }
 
 TimeEvent * TimeEvent::time_event_instance = nullptr;
@@ -97,7 +114,7 @@ void TimeEvent::_arm(const uint32_t timeout, const uint32_t interval) {
     if (xSemaphoreTake(TimeEvent::_parameters_mutex, portMAX_DELAY)) {
         _timeout = timeout;
         _interval = interval;
-        printf("Armed successfully to %ld \n", _timeout);
+        printf("Armed successfully to %ld , %ld \n", _timeout, _interval);
     } else {
         ESP_LOGE(TAG, "Arming failed\n");
     }
@@ -108,6 +125,7 @@ void TimeEvent::_disarm() {
     if (xSemaphoreTake(TimeEvent::_parameters_mutex, portMAX_DELAY)) {
         _timeout = 0U;
         _interval = 0U;
+        printf("Disarmed successfully\n");
     } else {
         ESP_LOGE(TAG, "Disarming failed\n");
     }
