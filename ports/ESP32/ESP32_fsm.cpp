@@ -29,13 +29,16 @@ constexpr TickType_t hsm_run_period{200};
 
 static auto TAG = "esp_fsm";
 
+static TimerHandle_t my_timer = xTimerCreate("MyTimer", pdMS_TO_TICKS(TIMER_PERIOD_MS), pdTRUE, nullptr, TimeEvent::tick);
+bool my_timer_started = false;
+
 void Active::_init(Active *object) {
     object->_start();
     xTaskCreate(event_loop, object->_task_name, object->_stack_size, object, object->_priority, nullptr);
 
-    if (TimerHandle_t my_timer = xTimerCreate("MyTimer", pdMS_TO_TICKS(TIMER_PERIOD_MS), pdTRUE, object, TimeEvent::tick); my_timer != nullptr) {
-        printf("Starting time event for %s\n", object->_task_name);
+    if (!my_timer_started && my_timer != nullptr) {
         xTimerStart(my_timer, 0);
+        my_timer_started = true;
     }
 
     if (TimerHandle_t run_timer = xTimerCreate("HSM Run", pdMS_TO_TICKS(hsm_run_period), pdTRUE, object, run); run_timer != nullptr) {
