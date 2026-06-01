@@ -29,17 +29,20 @@ constexpr TickType_t hsm_run_period{200};
 
 static auto TAG = "esp_fsm";
 
-Active * Active::active_instance = nullptr;
+static TimerHandle_t my_timer = xTimerCreate("MyTimer", pdMS_TO_TICKS(TIMER_PERIOD_MS), pdTRUE, nullptr, TimeEvent::tick);
+bool my_timer_started = false;
 
 void Active::_init(Active *object) {
     object->_start();
     xTaskCreate(event_loop, object->_task_name, object->_stack_size, object, object->_priority, nullptr);
 
-    if (TimerHandle_t my_timer = xTimerCreate("MyTimer", pdMS_TO_TICKS(TIMER_PERIOD_MS), pdTRUE, nullptr, TimeEvent::tick); my_timer != nullptr) {
+    if (!my_timer_started && my_timer != nullptr) {
         xTimerStart(my_timer, 0);
+        my_timer_started = true;
     }
 
-    if (TimerHandle_t run_timer = xTimerCreate("HSM Run", pdMS_TO_TICKS(hsm_run_period), pdTRUE, nullptr, run); run_timer != nullptr) {
+    if (TimerHandle_t run_timer = xTimerCreate("HSM Run", pdMS_TO_TICKS(hsm_run_period), pdTRUE, object, run); run_timer != nullptr) {
+        printf("Starting HSM Run timer for %s\n", object->_task_name);
         xTimerStart(run_timer, 0);
     }
 
@@ -48,8 +51,7 @@ void Active::_init(Active *object) {
 
 
 Active::Active(const StateHandler& initial): HSM(initial) {
-    printf("Active init\n");
-    active_instance = this;
+    printf("Active constructed\n");
 }
 
 void Active::_start() {
@@ -84,7 +86,8 @@ void Active::event_loop(void* param) {
 }
 
 void Active::run(TimerHandle_t xTimer) {
-    active_instance -> _run();
+    const auto* self = static_cast<Active*>(pvTimerGetTimerID(xTimer));
+    self -> _run();
 }
 
 void Active::_run() const {
