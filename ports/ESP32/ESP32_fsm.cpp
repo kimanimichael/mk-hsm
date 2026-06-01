@@ -89,7 +89,6 @@ void Active::run(TimerHandle_t xTimer) {
 
 void Active::_run() const {
     static constexpr Event hsm_run_sig = {HSM_RUN_SIG};
-    ESP_LOGI(TAG, "HSM_RUN_SIG: %s", _task_name);
     _post(&hsm_run_sig);
 }
 
